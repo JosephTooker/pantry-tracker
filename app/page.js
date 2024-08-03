@@ -7,6 +7,8 @@ import { collection, deleteDoc, getDoc, query, setDoc, doc, getDocs } from "fire
 
 export default function Home() {
   const [inventory, setInventory] = useState([])
+  const [filteredInventory, setFilteredInventory] = useState(inventory)
+  const [inputText, setInputText] = useState("")
   const [open, setOpen] = useState(false)
   const [itemName, setItemName] = useState('')
 
@@ -21,6 +23,7 @@ export default function Home() {
       })
     })
     setInventory(inventoryList)
+    setFilteredInventory(inventoryList)
   }
 
   const addItem = async (item) => {
@@ -49,6 +52,18 @@ export default function Home() {
       }
     }
     await updateInventory()
+  }
+
+  const search = async (query) => {
+    const filteredData = []
+    inventory.map((item) => {
+      let name = item.name.toLowerCase()
+      let caseQuery = query.toLowerCase()
+      if (name.indexOf(caseQuery) >= 0) {
+        filteredData.push(item)
+      }
+    })
+    setFilteredInventory(filteredData)
   }
 
   useEffect(() => {
@@ -84,8 +99,13 @@ export default function Home() {
         <Box width="800px" height="100px" bgcolor="#add8e6" display="flex" justifyContent="center" alignItems="center">
           <Typography variant="h2" color="black">Inventory Items</Typography>
         </Box>
+        <Box>
+          <TextField id="outlined-basic" variant="outlined" fullWidth label="Search" onChange={(e) => {
+              search(e.target.value)
+            }}></TextField>
+        </Box>
         <Stack width="800px" height="300px" spacing={2} overflow="auto">
-          {inventory.map(({name, quantity}) => (
+          {filteredInventory.map(({name, quantity}) => (
               <Box key={name} width="100%" minHeight="150px" display="flex" alignItems="center" justifyContent="space-between" bgcolor="#f0f0f0" padding={5}>
                 <Typography variant="h3" color="#333" textAlign="center">{name.charAt(0).toUpperCase() + name.slice(1)}</Typography>
                 <Typography variant="h3" color="#333" textAlign="center">{quantity}</Typography>
